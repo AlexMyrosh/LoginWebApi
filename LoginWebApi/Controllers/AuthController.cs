@@ -33,7 +33,6 @@ public class LoginController : ControllerBase
             return Unauthorized("Invalid credentials");
         }
             
-
         if (!IsJwtTokenValid(token))
         {
             return Unauthorized("Invalid token");
@@ -44,17 +43,22 @@ public class LoginController : ControllerBase
 
     private bool IsJwtTokenValid(string token)
     {
-        var publicKey = System.IO.File.ReadAllText("PublicKeys/public.pem");
+        var publicKey = System.IO.File.ReadAllText("Keys/public.pem");
 
         using var rsa = RSA.Create();
         rsa.ImportFromPem(publicKey.ToCharArray());
 
         var validationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidIssuer = "LoginWebApi",
+
+            ValidateAudience = true,
+            ValidAudience = "LoginWebApi",
+
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new RsaSecurityKey(rsa),
+
             ValidateLifetime = true
         };
 
